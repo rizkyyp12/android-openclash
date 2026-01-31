@@ -4,7 +4,7 @@ echo "======================================="
 echo " OpenClash + Android Airplane Installer"
 echo "======================================="
 
-REPO_RAW="https://raw.githubusercontent.com/rizkyyp12/android-openclash/main"
+REPO_RAW="https://raw.githubusercontent.com/rizkyyp12/android-openclash/main.py"
 
 BIN_DIR="/usr/bin"
 INIT_DIR="/etc/init.d"
