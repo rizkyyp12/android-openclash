@@ -10,7 +10,7 @@ BIN_DIR="/usr/bin"
 INIT_DIR="/etc/init.d"
 
 OC_SCRIPT="$BIN_DIR/oc-direct.sh"
-ANDROID_SCRIPT="$BIN_DIR/android.py"
+ANDROID_SCRIPT="$BIN_DIR/android.sh"
 INIT_SCRIPT="$INIT_DIR/oc-direct"
 
 # --- ROOT CHECK ---
@@ -22,7 +22,7 @@ INIT_SCRIPT="$INIT_DIR/oc-direct"
 echo "[+] Downloading scripts..."
 
 wget -qO "$OC_SCRIPT"      "$REPO_RAW/oc-direct.sh"   || exit 1
-wget -qO "$ANDROID_SCRIPT" "$REPO_RAW/android.py"     || exit 1
+wget -qO "$ANDROID_SCRIPT" "$REPO_RAW/android.sh"     || exit 1
 
 chmod +x "$OC_SCRIPT" "$ANDROID_SCRIPT"
 
