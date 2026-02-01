@@ -10,15 +10,13 @@ INTERVAL=30
 FAST_INTERVAL=5
 MAX_FAIL=2
 
-# --- ANDROID AIRPLANE MODE SCRIPT ---
-ANDROID_AIRPLANE_SCRIPT="/usr/bin/android.py"
-ANDROID_RECOVERY_FLAG="/tmp/android_airplane_active"
+ANDROID_SCRIPT="/usr/bin/android.sh"
+ANDROID_ACTIVE="/tmp/android_active"
 
-# --- OPENCLASH API ---
 YACD="http://127.0.0.1:9090"
 UA="Mozilla/5.0"
 
-echo "[BOOT] oc-direct + android-airplane started $(date)" >> "$LOG"
+echo "[BOOT] oc-direct started $(date)" >> "$LOG"
 
 # ================= UTIL =================
 log() {
@@ -45,7 +43,7 @@ clash_mode() {
 set_mode() {
     CUR="$(clash_mode)"
     [ "$CUR" = "$1" ] && return
-    log "Switch OpenClash MODE → $1"
+    log "Switch MODE → $1"
     curl -s -X PATCH "$YACD/configs" \
         -H "Content-Type: application/json" \
         -d "{\"mode\":\"$1\"}" >/dev/null
@@ -85,7 +83,7 @@ FAIL=0
 while true; do
     STATE="$(get_state)"
 
-    # --- CLASH API DOWN ---
+    # --- Clash API DOWN ---
     if ! clash_alive; then
         log "Clash API DOWN → restart OpenClash"
         /etc/init.d/openclash restart
@@ -93,9 +91,9 @@ while true; do
         continue
     fi
 
-    # --- PROXY NOT READY ---
+    # --- Proxy not ready ---
     if ! proxy_ready; then
-        log "Proxy NOT READY → FORCE DIRECT"
+        log "Proxy NOT READY → DIRECT"
         set_mode direct
         set_state DIRECT
         sleep "$FAST_INTERVAL"
@@ -105,10 +103,10 @@ while true; do
     # --- DOMAIN OK ---
     if any_domain_valid; then
         FAIL=0
-        rm -f "$ANDROID_RECOVERY_FLAG"
+        rm -f "$ANDROID_ACTIVE"
 
         if [ "$STATE" != "RULE" ]; then
-            log "DOMAIN RECOVERED → BACK TO RULE"
+            log "DOMAIN RECOVERED → RULE"
             set_mode rule
             set_state RULE
         fi
@@ -122,20 +120,19 @@ while true; do
     log "ALL DOMAIN INVALID, FAIL COUNT = $FAIL"
 
     if [ "$STATE" != "DIRECT" ]; then
-        log "FORCE DIRECT MODE"
         set_mode direct
         set_state DIRECT
     fi
 
-    # --- ANDROID AIRPLANE MODE RECOVERY ---
-    if [ "$FAIL" -ge "$MAX_FAIL" ]; then
-        touch "$ANDROID_RECOVERY_FLAG"
+    # ================= ANDROID RECOVERY =================
+    if [ "$FAIL" -ge "$MAX_FAIL" ] && [ "$STATE" != "RULE" ]; then
+        touch "$ANDROID_ACTIVE"
 
-        if [ -f "$ANDROID_AIRPLANE_SCRIPT" ]; then
-            log "ANDROID RECOVERY → TOGGLE AIRPLANE MODE"
-            python3 "$ANDROID_AIRPLANE_SCRIPT" >> "$LOG" 2>&1
+        if [ -x "$ANDROID_SCRIPT" ]; then
+            log "ANDROID RECOVERY → toggle airplane mode"
+            "$ANDROID_SCRIPT" >> "$LOG" 2>&1
         else
-            log "ERROR: Android airplane script NOT FOUND"
+            log "ERROR: $ANDROID_SCRIPT not found or not executable"
         fi
     fi
 
