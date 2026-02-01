@@ -10,7 +10,7 @@ INIT_DIR="/etc/init.d"
 
 rm -f \
     "$BIN_DIR/oc-direct.sh" \
-    "$BIN_DIR/android.py" \
+    "$BIN_DIR/android.sh" \
     "$INIT_DIR/oc-direct" \
     /tmp/oc.log \
     /tmp/oc_state \
